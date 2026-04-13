@@ -196,7 +196,7 @@ jobs:
   
       - if: github.event_name == 'workflow_dispatch' && github.workflow == 'Build (Windows)'
         name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: installer/windows/DB.Browser.for.SQLite-*.msi, DB.Browser.for.SQLite-*.zip
           prerelease: true

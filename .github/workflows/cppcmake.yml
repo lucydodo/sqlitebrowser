@@ -100,7 +100,7 @@ jobs:
         run: for f in target/*.zip; do unzip -d target/ "$f" && rm -v "$f"; done
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: target/*
           prerelease: true
