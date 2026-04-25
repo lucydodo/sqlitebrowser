@@ -6,12 +6,18 @@ on:
       NIGHTLY:
         default: false
         type: boolean
+      CONSOLIDATE_DEPENDENCY_SUMMARY:
+        default: false
+        type: boolean
   workflow_dispatch:
 
 jobs:
   build:
     name: ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      actions: read
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -20,7 +26,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       OPENSSL_VERSION: 1.1.1.2100
-      QT_VERSION: 5.15.2
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -50,7 +55,7 @@ jobs:
           arch: ${{ matrix.arch == 'x86' && 'win32_msvc2019' || matrix.arch == 'x64' && 'win64_msvc2019_64'}}
           cache: true
           cache-key-prefix: "cache"
-          version: ${{ env.QT_VERSION }}
+          version: 5.15.2
 
       - name: Install VS2019
         run: choco install visualstudio2019community --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --add Microsoft.VisualStudio.Component.VC.Redist.MSM"
@@ -63,13 +68,9 @@ jobs:
 
       - name: Build SQLite
         run: |
-          $htmlContent = Invoke-WebRequest -Uri "https://sqlite.org/download.html" | Select-Object -ExpandProperty Content
-          $regex = [regex]::new('PRODUCT,(\d+\.\d+\.\d+),(\d+/sqlite-amalgamation-\d+\.zip),\d+,(.+)')
-          $match = $regex.Match($htmlContent)
-          $relativeUrl = $match.Groups[2].Value
-          $downloadLink = "https://sqlite.org/$relativeUrl"
-          Invoke-WebRequest -Uri $downloadLink -OutFile 'sqlite.zip'
-          Expand-Archive -Path sqlite.zip -DestinationPath C:\dev\
+          Set-Location "${{ github.workspace }}\tools\windows"
+          $SQLiteArchiveFileName = (python download_latest_sqlite.py).Trim()
+          Expand-Archive -Path $SQLiteArchiveFileName -DestinationPath C:\dev\
           Move-Item -Path C:\dev\sqlite-amalgamation-* C:\dev\SQLite\
           cd C:\dev\SQLite
           cl sqlite3.c -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_PARENTHESIS -DSQLITE_ENABLE_STAT4 -DSQLITE_SOUNDEX -DSQLITE_ENABLE_JSON1 -DSQLITE_ENABLE_GEOPOLY -DSQLITE_ENABLE_RTREE -DSQLITE_ENABLE_MATH_FUNCTIONS -DSQLITE_MAX_ATTACHED=125 -DSQLITE_API="__declspec(dllexport)" -link -dll -out:sqlite3.dll
@@ -106,22 +107,32 @@ jobs:
       - name: Configure build (SQLite)
         run: |
           mkdir release-sqlite && cd release-sqlite
-          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\SQLite" ..\
+          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\SQLite" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLite)
         run: |
           cd release-sqlite
           cmake --build . --config Release
 
+      - name: Tests (SQLite)
+        run: |
+          cd release-sqlite
+          ctest -C Release --output-on-failure
+
       - name: Configure build (SQLCipher)
         run: |
           mkdir release-sqlcipher && cd release-sqlcipher
-          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" ..\
+          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLCipher)
         run: |
           cd release-sqlcipher
           cmake --build . --config Release
+
+      - name: Tests (SQLCipher)
+        run: |
+          cd release-sqlcipher
+          ctest -C Release --output-on-failure
 
       - if: github.event_name != 'pull_request'
         name: Create MSI
@@ -133,12 +144,12 @@ jobs:
           SQLitePath: C:\dev\SQLite
         run: |
           cd installer/windows
-          ./build.cmd "${{ matrix.arch }}".ToLower()
+          ./build.cmd ${{ matrix.arch }}
           $DATE=$(Get-Date -Format "yyyyMMdd")
           if ("${{ inputs.NIGHTLY }}" -eq "true") {
-            mv DB.Browser.for.SQLite-*.msi "DB.Browser.for.SQLite-$DATE-${{ matrix.arch }}.msi"
+            mv DB.Browser.for.SQLite-*.msi "DB.Browser.for.SQLite-$DATE-win-${{ matrix.arch }}.msi"
           } else {
-            mv DB.Browser.for.SQLite-*.msi "DB.Browser.for.SQLite-dev-$(git rev-parse --short HEAD)-${{ matrix.arch }}.msi"
+            mv DB.Browser.for.SQLite-*.msi "DB.Browser.for.SQLite-dev-$(git rev-parse --short HEAD)-win-${{ matrix.arch }}.msi"
           }
 
       - if: github.event_name != 'pull_request'
@@ -146,20 +157,21 @@ jobs:
         id: unsigned-artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}-unsigned
+          name: build-artifacts-${{ matrix.os }}-win-${{ matrix.arch }}-unsigned
           path: installer\windows\DB.Browser.for.SQLite-*.msi
+          retention-days: 1
 
       # Change the signing-policy-slug when you release an RC, RTM or stable release.
       - if: github.event_name != 'pull_request'
         name: Code signing with SignPath
         uses: signpath/github-action-submit-signing-request@v2
         with:
-          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          github-artifact-id: '${{ steps.unsigned-artifacts.outputs.artifact-id }}'
-          organization-id: '${{ secrets.SIGNPATH_ORGANIZATION_ID }}'
+          api-token: "${{ secrets.SIGNPATH_API_TOKEN }}"
+          github-artifact-id: "${{ steps.unsigned-artifacts.outputs.artifact-id }}"
+          organization-id: "${{ secrets.SIGNPATH_ORGANIZATION_ID }}"
           output-artifact-directory: .\installer\windows
-          project-slug: 'sqlitebrowser'
-          signing-policy-slug: 'test-signing'
+          project-slug: "sqlitebrowser"
+          signing-policy-slug: "test-signing"
           wait-for-completion: true
 
       - if: github.event_name != 'pull_request'
@@ -167,9 +179,9 @@ jobs:
         run: |
           $DATE=$(Get-Date -Format "yyyyMMdd")
           if ("${{ inputs.NIGHTLY }}" -eq "true") {
-            $FILENAME_FORMAT="DB.Browser.for.SQLite-$DATE-${{ matrix.arch }}.zip"
+            $FILENAME_FORMAT="DB.Browser.for.SQLite-$DATE-win-${{ matrix.arch }}.zip"
           } else {
-            $FILENAME_FORMAT="DB.Browser.for.SQLite-dev-$(git rev-parse --short HEAD)-${{ matrix.arch }}.zip"
+            $FILENAME_FORMAT="DB.Browser.for.SQLite-dev-$(git rev-parse --short HEAD)-win-${{ matrix.arch }}.zip"
           }
           Start-Process msiexec.exe -ArgumentList "/a $(dir installer\windows\DB.Browser.for.SQLite-*.msi) /q TARGETDIR=$PWD\target\" -Wait
           if ("${{ matrix.arch }}" -eq "x86") {
@@ -179,28 +191,15 @@ jobs:
           }
           Compress-Archive -Path "target\DB Browser for SQLite\*" -DestinationPath $FILENAME_FORMAT
 
-      - if: github.event_name != 'pull_request' && github.workflow != 'Build (Windows)'
-        name: Prepare artifacts
-        run: |
-          mkdir build-artifacts
-          move installer\windows\DB.Browser.for.SQLite-*.msi build-artifacts\
-          move DB.Browser.for.SQLite-*.zip build-artifacts\
-          Compress-Archive -Path build-artifacts\* -DestinationPath build-artifacts-${{ matrix.arch }}.zip
-
-      - if: github.event_name != 'pull_request' && github.workflow != 'Build (Windows)'
+      - if: github.event_name != 'pull_request'
         name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
-          path: build-artifacts-${{ matrix.arch }}.zip
-  
-      - if: github.event_name == 'workflow_dispatch' && github.workflow == 'Build (Windows)'
-        name: Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: installer/windows/DB.Browser.for.SQLite-*.msi, DB.Browser.for.SQLite-*.zip
-          prerelease: true
-          tag_name: ${{ github.sha }}-windows
+          name: build-artifacts-win-${{ matrix.arch }}
+          path: |
+            installer\windows\DB.Browser.for.SQLite-*.msi
+            DB.Browser.for.SQLite-*.zip
+          retention-days: 1
 
       - name: Summary
         run: |
@@ -212,5 +211,31 @@ jobs:
             $SQLITE_VERSION=$matches[1]
           }
 
-          echo "## Libaries used" >> $env:GITHUB_STEP_SUMMARY
-          echo "OpenSSL: $OPENSSL_VERSION, Qt: $QT_VERSION, SQLCipher: $SQLCIPHER_VERSION, SQLite: $SQLITE_VERSION" >> $env:GITHUB_STEP_SUMMARY
+          New-Item -ItemType Directory -Force -Path dependency-summary | Out-Null
+          $SUMMARY_ROW = "| Build (Windows) | ${{ matrix.os }} / ${{ matrix.arch }} | $OPENSSL_VERSION | $QT_VERSION | $SQLCIPHER_VERSION | $SQLITE_VERSION |"
+          Set-Content -Path "dependency-summary/dependencies-windows-${{ matrix.os }}-${{ matrix.arch }}.md" -Value $SUMMARY_ROW
+
+          if ("${{ inputs.CONSOLIDATE_DEPENDENCY_SUMMARY }}" -ne "true") {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## Dependencies used"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Workflow | Target | OpenSSL | Qt | SQLCipher | SQLite |"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| --- | --- | --- | --- | --- | --- |"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value $SUMMARY_ROW
+          }
+
+      - if: inputs.CONSOLIDATE_DEPENDENCY_SUMMARY == true
+        name: Upload dependency summary
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-summary-windows-${{ matrix.os }}-${{ matrix.arch }}
+          path: dependency-summary/*.md
+          retention-days: 1
+
+  release:
+    if: github.event_name == 'workflow_dispatch' && github.workflow == 'Build (Windows)'
+    needs: build
+    name: Release
+    permissions:
+      actions: read
+      contents: write
+    uses: ./.github/workflows/release.yml
