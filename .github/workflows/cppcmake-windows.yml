@@ -26,8 +26,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       OPENSSL_INCLUDE_DIR: C:\dev\OpenSSL\include
-      OPENSSL_CRYPTO_LIBRARY: C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libcrypto.lib
-      OPENSSL_SSL_LIBRARY: C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libssl.lib
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -40,6 +38,14 @@ jobs:
           python -m pip install --disable-pip-version-check -r requirements/download_latest_openssl3.txt
           $OpenSSLInstallerFileName = (python download_latest_openssl3.py).Trim()
           Start-Process -FilePath ".\$OpenSSLInstallerFileName" -ArgumentList '/ALLUSERS /verysilent /dir="C:\dev\OpenSSL"' -Wait
+
+      - name: Resolve OpenSSL library directory
+        run: |
+          $OpenSSLLibArch = "${{ matrix.arch }}"
+          if ("${{ matrix.arch }}" -eq "x86" -and -not (Test-Path "C:\dev\OpenSSL\lib\VC\x86\MD\libcrypto.lib")) {
+            $OpenSSLLibArch = "Win32"
+          }
+          "OPENSSL_LIB_ARCH=$OpenSSLLibArch" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -103,7 +109,7 @@ jobs:
       - name: Configure build (SQLite)
         run: |
           mkdir release-sqlite && cd release-sqlite
-          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="$env:OPENSSL_CRYPTO_LIBRARY" -DOPENSSL_SSL_LIBRARY="$env:OPENSSL_SSL_LIBRARY" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLite)
         run: |
@@ -118,7 +124,7 @@ jobs:
       - name: Configure build (SQLCipher)
         run: |
           mkdir release-sqlcipher && cd release-sqlcipher
-          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="$env:OPENSSL_CRYPTO_LIBRARY" -DOPENSSL_SSL_LIBRARY="$env:OPENSSL_SSL_LIBRARY" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLCipher)
         run: |
