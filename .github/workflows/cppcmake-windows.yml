@@ -25,6 +25,9 @@ jobs:
         os: [windows-2022]
     env:
       GH_TOKEN: ${{ github.token }}
+      OPENSSL_INCLUDE_DIR: C:\dev\OpenSSL\include
+      OPENSSL_CRYPTO_LIBRARY: C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libcrypto.lib
+      OPENSSL_SSL_LIBRARY: C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libssl.lib
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -100,7 +103,7 @@ jobs:
       - name: Configure build (SQLite)
         run: |
           mkdir release-sqlite && cd release-sqlite
-          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="C:\dev\OpenSSL\include" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libssl.lib" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="$env:OPENSSL_CRYPTO_LIBRARY" -DOPENSSL_SSL_LIBRARY="$env:OPENSSL_SSL_LIBRARY" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLite)
         run: |
@@ -115,7 +118,7 @@ jobs:
       - name: Configure build (SQLCipher)
         run: |
           mkdir release-sqlcipher && cd release-sqlcipher
-          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="C:\dev\OpenSSL\include" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\${{ matrix.arch }}\MD\libssl.lib" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="$env:OPENSSL_CRYPTO_LIBRARY" -DOPENSSL_SSL_LIBRARY="$env:OPENSSL_SSL_LIBRARY" -DENABLE_TESTING=ON ..\
 
       - name: Build (SQLCipher)
         run: |
