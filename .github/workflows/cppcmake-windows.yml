@@ -41,10 +41,24 @@ jobs:
 
       - name: Resolve OpenSSL library directory
         run: |
-          $OpenSSLLibArch = "${{ matrix.arch }}"
-          if ("${{ matrix.arch }}" -eq "x86" -and (-not (Test-Path "C:\dev\OpenSSL\lib\VC\x86\MD\libcrypto.lib") -or -not (Test-Path "C:\dev\OpenSSL\lib\VC\x86\MD\libssl.lib"))) {
-            $OpenSSLLibArch = "Win32"
+          if ("${{ matrix.arch }}" -eq "x86") {
+            $OpenSSLLibCandidates = @("x86", "Win32")
+          } else {
+            $OpenSSLLibCandidates = @("${{ matrix.arch }}")
           }
+
+          $OpenSSLLibArch = $null
+          foreach ($Candidate in $OpenSSLLibCandidates) {
+            if ((Test-Path "C:\dev\OpenSSL\lib\VC\$Candidate\MD\libcrypto.lib") -and (Test-Path "C:\dev\OpenSSL\lib\VC\$Candidate\MD\libssl.lib")) {
+              $OpenSSLLibArch = $Candidate
+              break
+            }
+          }
+
+          if ($null -eq $OpenSSLLibArch) {
+            throw "Could not locate OpenSSL libraries for architecture '${{ matrix.arch }}'"
+          }
+
           "OPENSSL_LIB_ARCH=$OpenSSLLibArch" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install Qt
