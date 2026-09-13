@@ -25,7 +25,6 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       OPENSSL_INCLUDE_DIR: C:\dev\OpenSSL\include
-      OPENSSL_LIB_ARCH: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -45,6 +44,23 @@ jobs:
           python -m pip install --disable-pip-version-check -r requirements/download_latest_openssl3.txt
           $OpenSSLInstallerFileName = (python download_latest_openssl3.py).Trim()
           Start-Process -FilePath ".\$OpenSSLInstallerFileName" -ArgumentList '/ALLUSERS /verysilent /dir="C:\dev\OpenSSL"' -Wait
+
+      - name: Resolve OpenSSL library directory
+        run: |
+          $OpenSSLLibCandidates = @("arm64", "ARM64")
+          $OpenSSLLibArch = $null
+          foreach ($Candidate in $OpenSSLLibCandidates) {
+            if ((Test-Path "C:\dev\OpenSSL\lib\VC\$Candidate\MD\libcrypto.lib") -and (Test-Path "C:\dev\OpenSSL\lib\VC\$Candidate\MD\libssl.lib")) {
+              $OpenSSLLibArch = $Candidate
+              break
+            }
+          }
+
+          if ($null -eq $OpenSSLLibArch) {
+            throw "Could not locate OpenSSL libraries for ARM64"
+          }
+
+          "OPENSSL_LIB_ARCH=$OpenSSLLibArch" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
