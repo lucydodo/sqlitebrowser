@@ -24,6 +24,8 @@ jobs:
         os: [windows-11-arm]
     env:
       GH_TOKEN: ${{ github.token }}
+      OPENSSL_INCLUDE_DIR: C:\dev\OpenSSL\include
+      OPENSSL_LIB_ARCH: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -131,7 +133,7 @@ jobs:
       - name: Configure build (SQLite)
         run: |
           mkdir release-sqlite && cd release-sqlite
-          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\SQLite" -DENABLE_TESTING=ON -DQT_MAJOR=Qt6 ..\
+          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON -DQT_MAJOR=Qt6 ..\
 
       - name: Build (SQLite)
         run: |
@@ -146,7 +148,7 @@ jobs:
       - name: Configure build (SQLCipher)
         run: |
           mkdir release-sqlcipher && cd release-sqlcipher
-          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DENABLE_TESTING=ON -DQT_MAJOR=Qt6 ..\
+          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON -DQT_MAJOR=Qt6 ..\
 
       - name: Build (SQLCipher)
         run: |
