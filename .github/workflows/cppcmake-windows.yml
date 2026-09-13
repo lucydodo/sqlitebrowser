@@ -43,6 +43,8 @@ jobs:
         run: |
           if ("${{ matrix.arch }}" -eq "x86") {
             $OpenSSLLibCandidates = @("x86", "Win32")
+          } elseif ("${{ matrix.arch }}" -eq "x64") {
+            $OpenSSLLibCandidates = @("x64", "Win64A")
           } else {
             $OpenSSLLibCandidates = @("${{ matrix.arch }}")
           }
