@@ -74,6 +74,8 @@ jobs:
       - name: Install VS2022
         run: choco install visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.ARM64 Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --add Microsoft.VisualStudio.Component.VC.Redist.MSM"
 
+      - run: tree "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Redist\MSVC" /F
+
       - name: Setup MSVC for ARM64
         uses: ilammy/msvc-dev-cmd@v1
         with:
