@@ -25,7 +25,17 @@ jobs:
       fail-fast: false
       matrix:
         bundle: [SQLCipher, SQLite]
-        os: [ubuntu-22.04, ubuntu-22.04-arm]
+        # The official Qt 6.8 ARM64 binaries require Ubuntu 24.04 (glibc 2.39).
+        os: [ubuntu-22.04, ubuntu-24.04-arm]
+        include:
+          - os: ubuntu-22.04
+            qt-host: linux
+            qt-arch: linux_gcc_64
+            fuse-package: libfuse2
+          - os: ubuntu-24.04-arm
+            qt-host: linux_arm64
+            qt-arch: linux_gcc_arm64
+            fuse-package: libfuse2t64
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -33,8 +43,18 @@ jobs:
       - name: Install and cache dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1.6.3
         with:
-          packages: libfuse2 libqcustomplot-dev libqscintilla2-qt5-dev libqt5svg5 ninja-build qttools5-dev
-          version: ${{ matrix.os }}
+          packages: ${{ matrix.fuse-package }} libwebpdemux2 libwebpmux3 ninja-build
+          version: ${{ matrix.os }}-qt6
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          host: ${{ matrix.qt-host }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+          cache-key-prefix: "cache"
+          modules: "qt5compat qtimageformats"
+          version: 6.8.3
 
       - if: matrix.bundle == 'SQLCipher'
         name: Build SQLCipher
@@ -67,10 +87,11 @@ jobs:
           mkdir -v appbuild appdir && cd appbuild
           cmake -G Ninja \
                 -DCMAKE_BUILD_TYPE=Release \
-                -DCMAKE_PREFIX_PATH=$RUNNER_TEMP/sqlcipher/prefix \
+                -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$RUNNER_TEMP/sqlcipher/prefix" \
                 -DCMAKE_INSTALL_PREFIX:PATH=../appdir/usr \
                 -DENABLE_TESTING=ON \
                 -DFORCE_INTERNAL_QSCINTILLA=ON \
+                -DQT_MAJOR=Qt6 \
                 -Dsqlcipher=${{ matrix.bundle == 'SQLCipher' }} ..
 
       - name: Build
@@ -82,6 +103,8 @@ jobs:
         run: ninja test
 
       - name: Build AppImage
+        env:
+          QMAKE: ${{ env.QT_ROOT_DIR }}/bin/qmake
         run: |
           wget -c -nv "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-$(uname -m).AppImage"
           wget -c -nv "https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20240109-1/linuxdeploy-plugin-qt-$(uname -m).AppImage"
@@ -112,7 +135,7 @@ jobs:
 
       - name: Summary
         run: |
-          QT_VERSION=$(qmake --version | awk '/Using Qt version/ {print $4}')
+          QT_VERSION=$("$QT_ROOT_DIR/bin/qmake" -query QT_VERSION)
           if [ "${{ matrix.bundle }}" = "SQLCipher" ]; then
               OPENSSL_VERSION=$(openssl version | awk '{print $2}')
               SQLCIPHER_VERSION=$($RUNNER_TEMP/sqlcipher/prefix/bin/sqlcipher ":memory:" "PRAGMA cipher_version;" | awk '{print $1}')
