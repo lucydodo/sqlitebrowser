@@ -40,8 +40,13 @@
         Visual Studio 2017. The build "ARCH" will be set automatically.
     -->
 
-    <?define VCRedistPath="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Redist\MSVC\14.29.30133\MergeModules" ?>
-    <?define VCRedistFile="Microsoft_VC142_CRT_$(sys.BUILDARCH).msm" ?>
+    <?if $(sys.BUILDARCH)="x64"?>
+        <?define VCRedistPath="$(env.VCToolsRedistDir)MergeModules" ?>
+        <?define VCRedistFile="Microsoft_VC143_CRT_$(sys.BUILDARCH).msm" ?>
+    <?else?>
+        <?define VCRedistPath="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Redist\MSVC\14.29.30133\MergeModules" ?>
+        <?define VCRedistFile="Microsoft_VC142_CRT_$(sys.BUILDARCH).msm" ?>
+    <?endif?>
 
     <!--
     =================================================== Build System ===================================================
@@ -49,6 +54,12 @@
     Paths for the various libraries the application needs to compile. Change these to match the build machine.
     -->
 
+    <!-- Windows x86 retains Qt5; x64 uses Qt6. -->
+    <?if $(sys.BUILDARCH)="x64"?>
+        <?define QtMajor="6" ?>
+    <?else?>
+        <?define QtMajor="5" ?>
+    <?endif?>
     <?define QtPath="$(env.QT_ROOT_DIR)" ?>
     <?define SQLitePath="$(env.SQLitePath)" ?>
     <?define SQLCipherPath="$(env.SQLCipherPath)" ?>

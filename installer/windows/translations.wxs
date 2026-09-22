@@ -8,7 +8,7 @@
         <DirectoryRef Id='INSTALLDIR'>
 
             <!--
-            Each language requires 6 *.qm files to work properly.
+            QtScript and XMLPatterns translations are only available in Qt5.
             
             The list of the required files:
                 - qt_<language_code>.qm
@@ -32,7 +32,9 @@
                 <Component><File Source="$(var.QtPath)\translations\qt_ar.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_ar.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_ar.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_ar.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_ar.qm" /></Component>
+                <?endif?>
 
                 <!-- Chinese (China) -->
                 <Component><File Source="$(var.QtPath)\translations\qt_zh_CN.qm" /></Component>
@@ -44,74 +46,98 @@
                 <Component><File Source="$(var.QtPath)\translations\qt_cs.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_cs.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_cs.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_cs.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_cs.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_cs.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_cs.qm" /></Component>
+                <?endif?>
 
                 <!-- English (United Kingdom) -->
                 <Component><File Source="$(var.QtPath)\translations\qt_en.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_en.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_en.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_en.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_en.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_en.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_en.qm" /></Component>
+                <?endif?>
 
                 <!-- French -->
                 <Component><File Source="$(var.QtPath)\translations\qt_fr.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_fr.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_fr.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_fr.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_fr.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_fr.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_fr.qm" /></Component>
+                <?endif?>
 
                 <!-- German -->
                 <Component><File Source="$(var.QtPath)\translations\qt_de.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_de.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_de.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_de.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_de.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_de.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_de.qm" /></Component>
+                <?endif?>
 
                 <!-- Italian -->
                 <Component><File Source="$(var.QtPath)\translations\qt_it.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_it.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_it.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_it.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_it.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_it.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_it.qm" /></Component>
+                <?endif?>
                 
                 <!-- Japanese -->
                 <Component><File Source="$(var.QtPath)\translations\qt_ja.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_ja.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_ja.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_ja.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ja.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_ja.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ja.qm" /></Component>
+                <?endif?>
 
                 <!-- Korean -->
                 <Component><File Source="$(var.QtPath)\translations\qt_ko.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_ko.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_ko.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_ko.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ko.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_ko.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ko.qm" /></Component>
+                <?endif?>
 
                 <!-- Polish -->
                 <Component><File Source="$(var.QtPath)\translations\qt_pl.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_pl.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_pl.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_pl.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_pl.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_pl.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_pl.qm" /></Component>
+                <?endif?>
 
                 <!-- Brazilian Portuguese -->
-                <Component><File Source="$(var.QtPath)\translations\qt_pt.qm" /></Component>
+                <?if $(var.QtMajor)="6"?>
+                    <Component><File Source="$(var.QtPath)\translations\qt_pt_BR.qm" /></Component>
+                <?else?>
+                    <Component><File Source="$(var.QtPath)\translations\qt_pt.qm" /></Component>
+                <?endif?>
 
                 <!-- Russian -->
                 <Component><File Source="$(var.QtPath)\translations\qt_ru.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_ru.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_ru.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_ru.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ru.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_ru.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_ru.qm" /></Component>
+                <?endif?>
 
                 <!-- Spanish -->
                 <Component><File Source="$(var.QtPath)\translations\qt_es.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_es.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_es.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_es.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_es.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_es.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_es.qm" /></Component>
+                <?endif?>
 
                 <!-- Turkish -->
 
@@ -119,8 +145,10 @@
                 <Component><File Source="$(var.QtPath)\translations\qt_uk.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtbase_uk.qm" /></Component>
                 <Component><File Source="$(var.QtPath)\translations\qtmultimedia_uk.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtscript_uk.qm" /></Component>
-                <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_uk.qm" /></Component>
+                <?if $(var.QtMajor)="5"?>
+                    <Component><File Source="$(var.QtPath)\translations\qtscript_uk.qm" /></Component>
+                    <Component><File Source="$(var.QtPath)\translations\qtxmlpatterns_uk.qm" /></Component>
+                <?endif?>
 
             </Directory>
 
@@ -132,7 +160,9 @@
             <ComponentRef Id="qt_ar.qm" />
             <ComponentRef Id="qtbase_ar.qm" />
             <ComponentRef Id="qtmultimedia_ar.qm" />
-            <ComponentRef Id="qtscript_ar.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_ar.qm" />
+            <?endif?>
 
             <!-- Chinese (China) -->
             <ComponentRef Id="qt_zh_CN.qm" />
@@ -144,74 +174,98 @@
             <ComponentRef Id="qt_cs.qm" />
             <ComponentRef Id="qtbase_cs.qm" />
             <ComponentRef Id="qtmultimedia_cs.qm" />
-            <ComponentRef Id="qtscript_cs.qm" />
-            <ComponentRef Id="qtxmlpatterns_cs.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_cs.qm" />
+                <ComponentRef Id="qtxmlpatterns_cs.qm" />
+            <?endif?>
 
             <!-- English (United Kingdom) -->
             <ComponentRef Id="qt_en.qm" />
             <ComponentRef Id="qtbase_en.qm" />
             <ComponentRef Id="qtmultimedia_en.qm" />
-            <ComponentRef Id="qtscript_en.qm" />
-            <ComponentRef Id="qtxmlpatterns_en.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_en.qm" />
+                <ComponentRef Id="qtxmlpatterns_en.qm" />
+            <?endif?>
 
             <!-- French -->
             <ComponentRef Id="qt_fr.qm" />
             <ComponentRef Id="qtbase_fr.qm" />
             <ComponentRef Id="qtmultimedia_fr.qm" />
-            <ComponentRef Id="qtscript_fr.qm" />
-            <ComponentRef Id="qtxmlpatterns_fr.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_fr.qm" />
+                <ComponentRef Id="qtxmlpatterns_fr.qm" />
+            <?endif?>
 
             <!-- German -->
             <ComponentRef Id="qt_de.qm" />
             <ComponentRef Id="qtbase_de.qm" />
             <ComponentRef Id="qtmultimedia_de.qm" />
-            <ComponentRef Id="qtscript_de.qm" />
-            <ComponentRef Id="qtxmlpatterns_de.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_de.qm" />
+                <ComponentRef Id="qtxmlpatterns_de.qm" />
+            <?endif?>
 
             <!-- Italian -->
             <ComponentRef Id="qt_it.qm" />
             <ComponentRef Id="qtbase_it.qm" />
             <ComponentRef Id="qtmultimedia_it.qm" />
-            <ComponentRef Id="qtscript_it.qm" />
-            <ComponentRef Id="qtxmlpatterns_it.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_it.qm" />
+                <ComponentRef Id="qtxmlpatterns_it.qm" />
+            <?endif?>
 
             <!-- Japanese -->
             <ComponentRef Id="qt_ja.qm" />
             <ComponentRef Id="qtbase_ja.qm" />
             <ComponentRef Id="qtmultimedia_ja.qm" />
-            <ComponentRef Id="qtscript_ja.qm" />
-            <ComponentRef Id="qtxmlpatterns_ja.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_ja.qm" />
+                <ComponentRef Id="qtxmlpatterns_ja.qm" />
+            <?endif?>
 
             <!-- Korean -->
             <ComponentRef Id="qt_ko.qm" />
             <ComponentRef Id="qtbase_ko.qm" />
             <ComponentRef Id="qtmultimedia_ko.qm" />
-            <ComponentRef Id="qtscript_ko.qm" />
-            <ComponentRef Id="qtxmlpatterns_ko.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_ko.qm" />
+                <ComponentRef Id="qtxmlpatterns_ko.qm" />
+            <?endif?>
 
             <!-- Polish -->
             <ComponentRef Id="qt_pl.qm" />
             <ComponentRef Id="qtbase_pl.qm" />
             <ComponentRef Id="qtmultimedia_pl.qm" />
-            <ComponentRef Id="qtscript_pl.qm" />
-            <ComponentRef Id="qtxmlpatterns_pl.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_pl.qm" />
+                <ComponentRef Id="qtxmlpatterns_pl.qm" />
+            <?endif?>
 
             <!-- Brazilian Portuguese -->
-            <ComponentRef Id="qt_pt.qm" />
+            <?if $(var.QtMajor)="6"?>
+                <ComponentRef Id="qt_pt_BR.qm" />
+            <?else?>
+                <ComponentRef Id="qt_pt.qm" />
+            <?endif?>
 
             <!-- Russian -->
             <ComponentRef Id="qt_ru.qm" />
             <ComponentRef Id="qtbase_ru.qm" />
             <ComponentRef Id="qtmultimedia_ru.qm" />
-            <ComponentRef Id="qtscript_ru.qm" />
-            <ComponentRef Id="qtxmlpatterns_ru.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_ru.qm" />
+                <ComponentRef Id="qtxmlpatterns_ru.qm" />
+            <?endif?>
 
             <!-- Spanish -->
             <ComponentRef Id="qt_es.qm" />
             <ComponentRef Id="qtbase_es.qm" />
             <ComponentRef Id="qtmultimedia_es.qm" />
-            <ComponentRef Id="qtscript_es.qm" />
-            <ComponentRef Id="qtxmlpatterns_es.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_es.qm" />
+                <ComponentRef Id="qtxmlpatterns_es.qm" />
+            <?endif?>
 
             <!-- Turkish -->
 
@@ -219,8 +273,10 @@
             <ComponentRef Id="qt_uk.qm" />
             <ComponentRef Id="qtbase_uk.qm" />
             <ComponentRef Id="qtmultimedia_uk.qm" />
-            <ComponentRef Id="qtscript_uk.qm" />
-            <ComponentRef Id="qtxmlpatterns_uk.qm" />
+            <?if $(var.QtMajor)="5"?>
+                <ComponentRef Id="qtscript_uk.qm" />
+                <ComponentRef Id="qtxmlpatterns_uk.qm" />
+            <?endif?>
 
         </ComponentGroup>
 

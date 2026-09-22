@@ -55,11 +55,17 @@
                     </Component>
 
                     <Directory Id="styles" Name="styles">
-                        <Component><File Source="$(var.QtPath)\plugins\styles\qwindowsvistastyle.dll" /></Component>
+                        <?if $(var.QtMajor)="6"?>
+                            <Component><File Source="$(var.QtPath)\plugins\styles\qmodernwindowsstyle.dll" /></Component>
+                        <?else?>
+                            <Component><File Source="$(var.QtPath)\plugins\styles\qwindowsvistastyle.dll" /></Component>
+                        <?endif?>
                     </Directory>
-                    <Directory Id="bearer" Name="bearer">
-                        <Component><File Source="$(var.QtPath)\plugins\bearer\qgenericbearer.dll" /></Component>
-                    </Directory>
+                    <?if $(var.QtMajor)="5"?>
+                        <Directory Id="bearer" Name="bearer">
+                            <Component><File Source="$(var.QtPath)\plugins\bearer\qgenericbearer.dll" /></Component>
+                        </Directory>
+                    <?endif?>
                     <Directory Id="extensions" Name="extensions">
                         <Component><File Source="$(var.SQLitePath)\formats.dll" /></Component>
                         <Component><File Source="$(var.SqleanPath)\sqlean.dll" /></Component>
@@ -81,9 +87,15 @@
                     <Directory Id="platforms" Name="platforms">
                         <Component><File Source="$(var.QtPath)\plugins\platforms\qwindows.dll" /></Component>
                     </Directory>
-                    <Directory Id="printsupport" Name="printsupport">
-                        <Component><File Source="$(var.QtPath)\plugins\printsupport\windowsprintersupport.dll" /></Component>
-                    </Directory>
+                    <?if $(var.QtMajor)="6"?>
+                        <Directory Id="tls" Name="tls">
+                            <Component><File Source="$(var.QtPath)\plugins\tls\qopensslbackend.dll" /></Component>
+                        </Directory>
+                    <?else?>
+                        <Directory Id="printsupport" Name="printsupport">
+                            <Component><File Source="$(var.QtPath)\plugins\printsupport\windowsprintersupport.dll" /></Component>
+                        </Directory>
+                    <?endif?>
                     <Directory Id="licenses" Name="licenses">
                         <Component><File Source="..\..\LICENSE" /></Component>
                         <Component><File Source="..\..\LICENSE-GPL-3.0" /></Component>
@@ -91,14 +103,17 @@
                         <Component><File Source="..\..\LICENSE-MPL-2.0" /></Component>
                         <Component><File Source="..\..\LICENSE-PLUGINS" /></Component>
                     </Directory>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Concurrent.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Core.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Gui.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Network.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5PrintSupport.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Widgets.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Xml.dll" /></Component>
-                    <Component><File Source="$(var.QtPath)\bin\Qt5Svg.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Concurrent.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Core.dll" /></Component>
+                    <?if $(var.QtMajor)="6"?>
+                        <Component><File Source="$(var.QtPath)\bin\Qt6Core5Compat.dll" /></Component>
+                    <?endif?>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Gui.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Network.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)PrintSupport.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Widgets.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Xml.dll" /></Component>
+                    <Component><File Source="$(var.QtPath)\bin\Qt$(var.QtMajor)Svg.dll" /></Component>
 		    <!-- OpenSSL 3.x -->
                     <?if $(sys.BUILDARCH)="x64"?>
                         <Component><File Id="libcrypto.dll" Source="$(var.OpenSSLPath)\bin\x64\libcrypto-3-x64.dll" /></Component>
@@ -168,8 +183,10 @@
             <!-- Translations -->
             <ComponentGroupRef Id="TranslationsGroup" />
 
-            <!-- Bearer -->
-            <ComponentRef Id="qgenericbearer.dll" />
+            <?if $(var.QtMajor)="5"?>
+                <!-- Bearer -->
+                <ComponentRef Id="qgenericbearer.dll" />
+            <?endif?>
             <!-- Plugins -->
             <ComponentRef Id="qsvgicon.dll" />
             <ComponentRef Id="qgif.dll" />
@@ -183,10 +200,17 @@
             <ComponentRef Id="qwebp.dll" />
             <!-- Platforms -->
             <ComponentRef Id="qwindows.dll" />
-            <!-- Windows Vista Style -->
+            <?if $(var.QtMajor)="6"?>
+                <!-- Windows Style -->
+                <ComponentRef Id="qmodernwindowsstyle.dll" />
+                <!-- TLS -->
+                <ComponentRef Id="qopensslbackend.dll" />
+            <?else?>
+                <!-- Windows Vista Style -->
                 <ComponentRef Id="qwindowsvistastyle.dll" />
-            <!-- Printer -->
-            <ComponentRef Id="windowsprintersupport.dll" />
+                <!-- Printer -->
+                <ComponentRef Id="windowsprintersupport.dll" />
+            <?endif?>
             <!-- Licenses -->
             <ComponentRef Id="LICENSE" />
             <ComponentRef Id="LICENSE_GPL_3.0" />
@@ -194,14 +218,17 @@
             <ComponentRef Id="LICENSE_MPL_2.0" />
             <ComponentRef Id="LICENSE_PLUGINS" />
             <!-- Qt -->
-            <ComponentRef Id="Qt5Concurrent.dll" />
-            <ComponentRef Id="Qt5Core.dll" />
-            <ComponentRef Id="Qt5Gui.dll" />
-            <ComponentRef Id="Qt5Network.dll" />
-            <ComponentRef Id="Qt5PrintSupport.dll" />
-            <ComponentRef Id="Qt5Widgets.dll" />
-            <ComponentRef Id="Qt5Xml.dll" />
-            <ComponentRef Id="Qt5Svg.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Concurrent.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Core.dll" />
+            <?if $(var.QtMajor)="6"?>
+                <ComponentRef Id="Qt6Core5Compat.dll" />
+            <?endif?>
+            <ComponentRef Id="Qt$(var.QtMajor)Gui.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Network.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)PrintSupport.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Widgets.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Xml.dll" />
+            <ComponentRef Id="Qt$(var.QtMajor)Svg.dll" />
             <!-- OpenSSL -->
             <ComponentRef Id="libcrypto.dll" />
             <ComponentRef Id="libssl.dll" />

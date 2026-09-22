@@ -23,6 +23,19 @@ jobs:
       matrix:
         arch: [x86, x64]
         os: [windows-2022]
+        include:
+          - arch: x86
+            qt-version: 5.15.2
+            qt-arch: win32_msvc2019
+            qt-major: Qt5
+            qt-modules: ""
+            vs-version: 2019
+          - arch: x64
+            qt-version: 6.8.3
+            qt-arch: win64_msvc2022_64
+            qt-major: Qt6
+            qt-modules: "qt5compat qtimageformats"
+            vs-version: 2022
     env:
       GH_TOKEN: ${{ github.token }}
       OPENSSL_INCLUDE_DIR: C:\dev\OpenSSL\include
@@ -66,19 +79,21 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          arch: ${{ matrix.arch == 'x86' && 'win32_msvc2019' || matrix.arch == 'x64' && 'win64_msvc2019_64'}}
+          arch: ${{ matrix.qt-arch }}
           cache: true
           cache-key-prefix: "cache"
-          version: 5.15.2
+          modules: ${{ matrix.qt-modules }}
+          version: ${{ matrix.qt-version }}
 
       - name: Install VS2019
+        if: matrix.arch == 'x86'
         run: choco install visualstudio2019community --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 --add Microsoft.VisualStudio.Component.VC.Redist.MSM"
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch == 'x86' && 'amd64_x86' || matrix.arch == 'x64' && 'amd64'}}
-          vsversion: 2019
+          vsversion: ${{ matrix.vs-version }}
 
       - name: Build SQLite
         run: |
@@ -125,7 +140,7 @@ jobs:
       - name: Configure build (SQLite)
         run: |
           mkdir release-sqlite && cd release-sqlite
-          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLite" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON -DQT_MAJOR=${{ matrix.qt-major }} ..\
 
       - name: Build (SQLite)
         run: |
@@ -140,7 +155,7 @@ jobs:
       - name: Configure build (SQLCipher)
         run: |
           mkdir release-sqlcipher && cd release-sqlcipher
-          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON ..\
+          cmake -G "Ninja Multi-Config" -Dsqlcipher=1 -DCMAKE_PREFIX_PATH="C:\dev\OpenSSL;C:\dev\SQLCipher" -DOPENSSL_INCLUDE_DIR="$env:OPENSSL_INCLUDE_DIR" -DOPENSSL_CRYPTO_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libcrypto.lib" -DOPENSSL_SSL_LIBRARY="C:\dev\OpenSSL\lib\VC\$env:OPENSSL_LIB_ARCH\MD\libssl.lib" -DENABLE_TESTING=ON -DQT_MAJOR=${{ matrix.qt-major }} ..\
 
       - name: Build (SQLCipher)
         run: |
