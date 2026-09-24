@@ -22,7 +22,7 @@
 
 #include <qglobal.h>
 
-#if QT_VERSION < 0x060000 && defined(Q_OS_OSX)
+#if defined(Q_OS_MACOS)
 
 #include <QByteArray>
 #include <QLatin1String>
@@ -31,13 +31,51 @@
 #include <QStringList>
 #include <QVariant>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+#include <QUtiMimeConverter>
+#elif QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QMacPasteboardMime>
+#else
+#error Native rectangular clipboard support on macOS requires Qt 6.5 or later.
+#endif
 
 
 static const QLatin1String mimeRectangular("text/x-qscintilla-rectangular");
 static const QLatin1String utiRectangularMac("com.scintilla.utf16-plain-text.rectangular");
 
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+class RectangularPasteboardMime : public QUtiMimeConverter
+{
+public:
+    QList<QByteArray> convertFromMime(const QString &, const QVariant &data,
+            const QString &) const override
+    {
+        return {data.toByteArray()};
+    }
+
+    QVariant convertToMime(const QString &, const QList<QByteArray> &data,
+            const QString &) const override
+    {
+        QByteArray converted;
+
+        for (const QByteArray &item : data)
+            converted += item;
+
+        return converted;
+    }
+
+    QString utiForMime(const QString &mime) const override
+    {
+        return mime == mimeRectangular ? QString(utiRectangularMac) : QString();
+    }
+
+    QString mimeForUti(const QString &uti) const override
+    {
+        return uti == utiRectangularMac ? QString(mimeRectangular) : QString();
+    }
+};
+#else
 class RectangularPasteboardMime : public QMacPasteboardMime
 {
 public:
@@ -92,6 +130,7 @@ public:
         return QString();
     }
 };
+#endif
 
 
 // Initialise the singleton instance.
@@ -103,7 +142,13 @@ void initialiseRectangularPasteboardMime()
     {
         instance = new RectangularPasteboardMime();
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         qRegisterDraggedTypes(QStringList(utiRectangularMac));
+#else
+        // Qt 6 registers the converter on construction. QScintilla drags also
+        // contain text/plain, which Cocoa already accepts, so they do not need
+        // a separate registration for the rectangular selection marker.
+#endif
     }
 }
 

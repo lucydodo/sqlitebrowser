@@ -7,7 +7,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 find_package(${QT_MAJOR} REQUIRED COMPONENTS PrintSupport Widgets)
 
 if(APPLE)
-    find_package(${QT_MAJOR} REQUIRED COMPONENTS MacExtras)
+    if(QT_MAJOR STREQUAL "Qt5")
+        find_package(Qt5 REQUIRED COMPONENTS MacExtras)
+    else()
+        # QUtiMimeConverter preserves native rectangular clipboard formats.
+        find_package(Qt6 6.5 REQUIRED COMPONENTS Gui)
+    endif()
 endif()
 
 add_definitions(-DSCINTILLA_QT)
@@ -316,8 +321,8 @@ target_include_directories(qscintilla2 INTERFACE .)
 
 target_link_libraries(qscintilla2 ${QT_MAJOR}::Widgets ${QT_MAJOR}::PrintSupport)
 
-if (APPLE)
-    target_link_libraries(qscintilla2 ${QT_MAJOR}::MacExtras)
+if(APPLE AND QT_MAJOR STREQUAL "Qt5")
+    target_link_libraries(qscintilla2 Qt5::MacExtras)
 endif()
 
 add_library(QScintilla::QScintilla ALIAS qscintilla2)

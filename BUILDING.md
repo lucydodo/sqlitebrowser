@@ -126,6 +126,11 @@ sudo make install
 
 ### macOS
 
+When building with Qt 6, use Qt 6.5 or later and configure with
+`-DQT_MAJOR=Qt6 -DCMAKE_PREFIX_PATH=/path/to/Qt`. The bundled QScintilla uses
+Qt GUI's `QUtiMimeConverter` to preserve native rectangular clipboard and
+drag-and-drop formats. Qt 5 builds continue to use Qt Mac Extras.
+
 #### Build an `.app` bundle
 The application can be compiled to an .app bundle, suitable for placing in
 /Applications.

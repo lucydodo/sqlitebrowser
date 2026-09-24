@@ -23,7 +23,7 @@ jobs:
         bundle: [SQLCipher, SQLite]
         os: [macos-26]
     env:
-      MACOSX_DEPLOYMENT_TARGET: 10.13
+      MACOSX_DEPLOYMENT_TARGET: 10.15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -32,7 +32,11 @@ jobs:
         run: |
           brew tap sqlitebrowser/tap
           brew trust sqlitebrowser/tap
-          brew install sqlb-qt@5 sqlb-sqlcipher sqlb-sqlite ninja
+          brew install \
+            homebrew/core/qt \
+            sqlitebrowser/tap/sqlb-sqlcipher \
+            sqlitebrowser/tap/sqlb-sqlite \
+            homebrew/core/ninja
           npm install -g appdmg
 
       - name: Configure build
@@ -55,9 +59,9 @@ jobs:
           cmake -G Ninja \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_CXX_STANDARD=14 \
-                -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
                 -DcustomTap=1 \
                 -DENABLE_TESTING=ON \
+                -DQT_MAJOR=Qt6 \
                 -Dsqlcipher=${{ matrix.bundle == 'SQLCipher' }} ..
 
       - name: Build
@@ -102,7 +106,7 @@ jobs:
 
       - name: Summary
         run: |
-          QT_VERSION=$($(brew --prefix sqlb-qt@5)/bin/qmake --version | awk '/Using Qt version/ {print $4}')
+          QT_VERSION=$($(brew --prefix qt)/bin/qmake --version | awk '/Using Qt version/ {print $4}')
           if [ "${{ matrix.bundle }}" = "SQLCipher" ]; then
               OPENSSL_VERSION=$($(brew --prefix sqlb-openssl@3)/bin/openssl version | awk '{print $2}')
               SQLCIPHER_VERSION=$($(brew --prefix sqlb-sqlcipher)/bin/sqlcipher ":memory:" "PRAGMA cipher_version;" | awk '{print $1}')

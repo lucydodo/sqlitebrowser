@@ -73,6 +73,11 @@ set(QT_LIBS
 if(QT_MAJOR STREQUAL "Qt6")
     find_package(Qt6 REQUIRED COMPONENTS Core5Compat)
     list(APPEND QT_LIBS Qt6::Core5Compat)
+    if(APPLE)
+        # MainWindow creates a QOpenGLWidget on macOS. In Qt 6 it has its own module.
+        find_package(Qt6 REQUIRED COMPONENTS OpenGLWidgets)
+        list(APPEND QT_LIBS Qt6::OpenGLWidgets)
+    endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES
         AUTOUIC_OPTIONS "--connections=string"
     )

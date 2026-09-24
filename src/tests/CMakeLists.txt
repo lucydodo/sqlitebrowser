@@ -81,3 +81,17 @@ set(TESTCACHE_HDR
 add_executable(test-cache ${TESTCACHE_HDR} ${TESTCACHE_SRC})
 target_link_libraries(test-cache ${QT_MAJOR}::Test)
 add_test(NAME test-cache COMMAND $<TARGET_FILE:test-cache>)
+
+# Exercise the bundled converter through Cocoa, including native drop events.
+if(APPLE AND TARGET qscintilla2)
+    enable_language(OBJCXX)
+    add_executable(test-mac-pasteboard TestMacPasteboardMime.mm)
+    set_target_properties(test-mac-pasteboard PROPERTIES
+        OBJCXX_STANDARD ${CMAKE_CXX_STANDARD}
+        OBJCXX_STANDARD_REQUIRED ON
+    )
+    target_link_libraries(test-mac-pasteboard PRIVATE
+        QScintilla::QScintilla ${QT_MAJOR}::Test "-framework AppKit")
+    add_test(NAME test-mac-pasteboard COMMAND $<TARGET_FILE:test-mac-pasteboard>)
+    set_tests_properties(test-mac-pasteboard PROPERTIES RUN_SERIAL TRUE)
+endif()
