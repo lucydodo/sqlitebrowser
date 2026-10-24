@@ -28,11 +28,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # FIXME:
       - name: Install dependencies
         run: |
           brew tap sqlitebrowser/tap
+          brew tap lucydodo/tap
           brew trust sqlitebrowser/tap
-          brew install sqlb-qt@5 sqlb-sqlcipher sqlb-sqlite ninja
+          brew trust lucydodo/tap
+          brew install sqlitebrowser/tap/sqlb-qt@5 sqlitebrowser/tap/sqlb-sqlcipher sqlitebrowser/tap/sqlb-sqlite lucydodo/tap/sqlb-icu ninja
           npm install -g appdmg
 
       - name: Configure build

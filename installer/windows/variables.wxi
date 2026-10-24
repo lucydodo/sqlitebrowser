@@ -37,11 +37,13 @@
     VCRedistFile
         The Visual C++ runtime file. This file is usually named "Microsoft_[VERSION]_CRT_[ARCH].msm". "VERSION" is the
         Visual Studio version the application is built with. Use VC141 (version 14.1) if the application is built with
-        Visual Studio 2017. The build "ARCH" will be set automatically.
+        Visual Studio 2017. The prebuilt ICU libraries are built with Visual Studio 2022, so VC143 (version 14.3) is
+        used even though the application itself is built with Visual Studio 2019. The build "ARCH" will be set
+        automatically. TODO: We also need to update this when migrating to Qt6 later.
     -->
 
-    <?define VCRedistPath="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Redist\MSVC\14.29.30133\MergeModules" ?>
-    <?define VCRedistFile="Microsoft_VC142_CRT_$(sys.BUILDARCH).msm" ?>
+    <?define VCRedistPath="$(env.VCRedistPath)" ?>
+    <?define VCRedistFile="Microsoft_VC143_CRT_$(sys.BUILDARCH).msm" ?>
 
     <!--
     =================================================== Build System ===================================================
@@ -54,6 +56,8 @@
     <?define SQLCipherPath="$(env.SQLCipherPath)" ?>
     <?define OpenSSLPath="$(env.OpenSSLPath)" ?>
     <?define SqleanPath="$(env.SqleanPath)" ?>
+    <?define ICUPath="$(env.ICUPath)" ?>
+    <?define ICUMajorVersion="$(env.ICUMajorVersion)" ?>
     <?define SQLiteExePath="$(env.ExePath)\release-sqlite\Release" ?>
     <?define SQLCipherExePath="$(env.ExePath)\release-sqlcipher\Release" ?>
 
